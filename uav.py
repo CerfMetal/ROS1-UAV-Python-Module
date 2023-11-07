@@ -38,6 +38,8 @@ class uav():
             self.rate.sleep()
             return result
         return wrapper
+    
+
 
     def __init__(self, node_name: str, rate_value: int):
         self.node_name = node_name
@@ -276,7 +278,52 @@ class uav():
             return True
         return False
     
+    #stops anyfurther execution while waiting to reach the target
+    @wait
+    def wait_for_target_pos(self):
+        while not self.check_for_target_reached(): # TODO: include object avoidance check
+            self.rate.sleep()
+            pass
+    
     @wait
     def send_pwm(self, pin, value):
         self.RC_Control.channels[pin] = value
         self.rc_override.publish(self.RC_Control)
+    
+    #reads a drop mission from a file, follows waypoints and drops on arrival where specified
+    #NOTE: coordinates should be stored in a texfile in format: lat, long, alt
+    #to specify a coordinate as a drop point, place a 1 following the coordinate
+    #to not drop, place a zero following the coordinate    
+    @wait
+    def drop_mission(self,text_file):
+        file = open(text_file)
+        content = file.readlines()
+        for line in content:
+            line = line.rstrip()
+            vals = line.split(', ')
+            if len(line) > 0:
+                vals = line.split(', ')
+                Lat = float(vals[0])
+                Long = float(vals[1])
+                Alt = int(vals[2])
+                Drop = int(vals[3])
+                print(f'Lat: {Lat} Long: {Long} Alt: {Alt} Drop?: {Drop}')
+                self.move_to_gps(Lat, Long, Alt)
+                self.wait_for_target_pos()
+                if(Drop == 1):
+                    self.drop_package()
+                    
+            else:
+                L.ERROR("Invalid Input String")
+    
+    #function for dropping packages        
+    @wait
+    def drop_package(self):
+        L.INFO("Arrived at dropping location")
+        sleep(2)
+        self.send_pwm(8, 2000)
+        sleep(2)
+        L.INFO("Package dropped")
+        self.send_pwm(8, 1100)
+
+        

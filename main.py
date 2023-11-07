@@ -11,7 +11,7 @@ def wait():
         drone.rate.sleep()
         pass
 
-time.sleep(3)
+time.sleep(15)
 drone = uav("offb_node_py", 20.0)
 drone.connnect()
 
@@ -21,7 +21,7 @@ drone.arm(True)
 # Needed, for the OFFBOARD to work, idk why
 drone.take_off(2)
 wait()
-
+"""
 drone.move_to_gps(43.64475, -79.38499, 25)
 wait()
 drone.move_to_gps(43.64375, -79.38464, 25)
@@ -38,6 +38,9 @@ time.sleep(2)
 L.INFO("Package dropped")
 drone.send_pwm(8, 1100)
 
+"""
+drone.drop_mission('../catkin_ws/src/px-lib-1/scripts/wp_demo.txt')
+
 drone.return_to_home()
 
 
@@ -45,10 +48,13 @@ drone.return_to_home()
 
 # Example by using waypoints
 def waypoint_mission():
+    """
     drone.create_waypoint(3, 16, True, True, 0, 43.64475, -79.38499, 25)
     drone.create_waypoint(3, 16, False, True, 0, 43.64375, -79.38464, 25)
     drone.create_waypoint(3, 16, True, True, 0, 43.64312, -79.38800, 25)
     drone.create_waypoint(3, 16, False, True, 0, 43.64344, -79.38868, 25)
+    """
+    #drone.drop_mission('mission.txt')
 
     drone.arm(True)
     drone.start_mission()
